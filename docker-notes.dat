@@ -1,0 +1,223 @@
+
+http://docker-saigon.github.io/post/Docker-Internals/
+
+http://kimh.github.io/blog/en/docker/gotchas-in-writing-dockerfile-en/
+
+https://medium.com/lucjuggery/about-var-run-docker-sock-3bfd276e12fd
+
+http://www.johnzaccone.io/entrypoint-vs-cmd-back-to-basics/
+
+https://www.sep.com/sep-blog/2017/02/24/nginx-reverse-proxy-to-asp-net-core-same-container/
+
+https://runnable.com/blog/9-common-dockerfile-mistakes
+
+How to search for docker images - use search command
+
+docker uses linux containers(a kernel feature) for operating system level isolation
+
+When you run docker make sure you run the required process in foreground
+
+Login to public docker hub -
+
+docker file - used from automation of creation of docker images
+
+
+tail -n <number_of_lines> /path/to/file   ---> when you want to view a certain part at the beginning or at the end of a file, 
+
+some command > /dev/null 2>&1
+>/dev/null redirects the command standard output to the null device, which is a special device which discards the information written to it
+2 >&1 redirects the standard error stream to the standard output stream (stderr = 2, stdout = 1).
+In practice it prevents any output from the command (both stdout and stderr) from being displayed. It's used when you don't care about the command output.
+
+docker run -d apache-server apachectl start && tail -f /dev/null   ---> By doing this, even if your main command runs in the background, your container doesn’t stop because tail is keep running in the foreground. We can use this technique in the apache case.
+
+ 
+docker login --username=shine17 --email=gladiator2017@gmail.com
+docker login -u shine17 -p somepassword
+
+
+docker login -u cmaapiops -p 123456
+docker logout
+
+
+service docker restart   —> Restart docker on deoman on the host
+
+
+docker search mysql   —> search for the docker image mysql
+
+
+docker pull mysql —> pull the docker image from docker registry. This will pull the latest image
+
+also docker pull mysql:latest  —> will pull the latest image . Here ‘latest’ is the tag
+
+docker pull ubuntu:14.04 —> will pull the ubuntu image with 14.04 tag
+
+docker images  —> list all the docker images in the local
+
+
+docker run -d -ti ubuntu:latest —-> run the docker container in detach mode and later login interactively
+
+docker run -d -it --name=shine ubuntu:latest  /bin/bash  — > run the docker with name as shine
+
+docker ps —> list all running containers which are running
+
+docker ps -a    —> list all running and non running container
+
+docker ps -a -q — > list all short ids for containers
+
+docker rm $(docker ps -a -q) —-> remove all containers in one shot
+
+docker rmi -f $(docker images | grep "^<none>" | awk "{print $3}")   --- > remove the untagged images
+
+docker image rm nginx
+
+docker rmi 15be12f95159 —> docker remove image id 
+
+docker logs firstcharactersofcontainerid  eg: docker logs weyreee
+
+
+exit from a container without stopping it - CLRL + P + Q
+
+docker attach container id —> docker attach c6b4ded5ab2a —> attach to a running container
+
+docker start container id —> docker start c6b4ded5ab2a —> start the container which is stopped
+
+docker top container id — > docker top c6b4ded5ab2a — > list the top process in container
+
+docker exec containerid ps  --> list the top process in the container
+
+
+cd /var/lib/docker/containers  —> location in the linux host where you will see all the containers and its files
+
+
+Read/Write things in a container is ephemeral meaning when you stop container, everything will be gone. To have a persistence, you need to attach a volume like below
+
+docker run ti -v /data --name=somename ubuntu:14.04 /bin/bash   — > /v is the volume and /data is mount point. so here all the data written in /data will be persistent even after container is stopped.
+
+cd /var/lib/docker/volumes —> will contain all the data stored in the attached mount point of computer
+
+Attach a specific directory in host to container - 
+
+docker run ti -v hostdirectory:directoryonthecontainer --name=somename ubuntu:14.04 /bin/bash 
+
+docker run -ti -d -p 80:80 myimage 
+docker run -ti -d -p 80:80 cmaapiops/swaggerpoc
+
+eg:- 
+docker run ti -v /srv/test:/data --name=somename ubuntu:14.04 /bin/bash 
+
+
+Expose a port in container -  docker run -d -p 3306 -ti mysql /bin/bash
+
+iptables -L -t nat
+
+Forward a local port to a container port
+
+Expose a port in container -  docker run -d -p localhostport:containerport -ti mysql /bin/bash
+
+docker run -d -p 3306:3306 -ti mysql /bin/bash
+
+ip addr show  - list of the local network setting in linux
+
+docker0 bridge provide connection between local host and the container 
+
+CNI - container network interface.
+
+
+push and image to remote docker repo -
+
+first tag the image with repo path and then push the repo
+
+docker tag swaggerui cmaapiops/swaggerpoc
+
+docker push cmaapiops/swaggerpoc
+
+Remove all docker images , containers and cache
+docker kill $(docker ps -q)
+
+docker rmi $(docker images -a -q) -f 
+
+
+docker-compose up
+
+docker-compose up -d
+
+docker-compose stop
+
+docker-compose build --no-cache
+
+
+docker build -t "dotnetapp:latest" . 
+
+docker exec -it imagename /bin/bash
+
+docker inspect imagename  ---> returns low level information for docker objects
+
+docker info ---> return information of docker engine in the host
+
+docker history imagename ---> return history of image
+
+
+By defualt docker demon listens on /var/run/docker.sock unix socket.  Unix domain socket or IPC socket (inter-process communication socket) is a data communications endpoint for exchanging data between processes executing on the same host operating system. 
+All the http endpoints defined in docker engine can be consumed through unix socket , thus we can issue curl like below
+
+curl -X POST --unix-socket /var/run/docker.sock -d '{"Image":"nginx"}' -H 'Content-Type: application/json' http://localhost/containers/create
+curl --unix-socket /var/run/docker.sock http:/containers/json
+
+
+When you do a docker build - What’s happening here is Docker client makes tarball of entries under the current directory and send it to Docker daemon. The reason why thiis is required is because your Docker daemon may be running on remote machine. That’s why the above command says Uploading.
+
+
+The ENTRYPOINT specifies a command that will always be executed when the container starts.
+
+The CMD specifies arguments that will be fed to the ENTRYPOINT.
+
+If you want to make an image dedicated to a specific command you will use ENTRYPOINT ["/path/dedicated_command"]
+
+Otherwise, if you want to make an image for general purpose, you can leave ENTRYPOINT unspecified and use CMD ["/path/dedicated_command"] as you will be able to override the setting by supplying arguments to docker run.
+
+For example, if your Dockerfile is:
+
+FROM debian:wheezy
+ENTRYPOINT ["/bin/ping"]
+CMD ["localhost"]
+Running the image without any argument will ping the localhost:
+
+$ docker run -it test
+PING localhost (127.0.0.1): 48 data bytes
+56 bytes from 127.0.0.1: icmp_seq=0 ttl=64 time=0.096 ms
+56 bytes from 127.0.0.1: icmp_seq=1 ttl=64 time=0.088 ms
+56 bytes from 127.0.0.1: icmp_seq=2 ttl=64 time=0.088 ms
+^C--- localhost ping statistics ---
+3 packets transmitted, 3 packets received, 0% packet loss
+round-trip min/avg/max/stddev = 0.088/0.091/0.096/0.000 ms
+Now, running the image with an argument will ping the argument:
+
+$ docker run -it test google.com
+PING google.com (173.194.45.70): 48 data bytes
+56 bytes from 173.194.45.70: icmp_seq=0 ttl=55 time=32.583 ms
+56 bytes from 173.194.45.70: icmp_seq=2 ttl=55 time=30.327 ms
+56 bytes from 173.194.45.70: icmp_seq=4 ttl=55 time=46.379 ms
+^C--- google.com ping statistics ---
+5 packets transmitted, 3 packets received, 40% packet loss
+round-trip min/avg/max/stddev = 30.327/36.430/46.379/7.095 ms
+For comparison, if your Dockerfile is:
+
+FROM debian:wheezy
+CMD ["/bin/ping", "localhost"]
+Running the image without any argument will ping the localhost:
+
+$ docker run -it test
+PING localhost (127.0.0.1): 48 data bytes
+56 bytes from 127.0.0.1: icmp_seq=0 ttl=64 time=0.076 ms
+56 bytes from 127.0.0.1: icmp_seq=1 ttl=64 time=0.087 ms
+56 bytes from 127.0.0.1: icmp_seq=2 ttl=64 time=0.090 ms
+^C--- localhost ping statistics ---
+3 packets transmitted, 3 packets received, 0% packet loss
+round-trip min/avg/max/stddev = 0.076/0.084/0.090/0.000 ms
+But running the image with an argument will run the argument:
+
+docker run -it test bash
+root@e8bb7249b843:/#
+
+
