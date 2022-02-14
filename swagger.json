@@ -1,0 +1,195 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Sku Mapping Api",
+    "version": "v1"
+  },
+  "servers": [
+    {
+      "url": ""
+    }
+  ],
+  "paths": {
+    "/api/v1/SkuMapping/orderitems": {
+      "get": {
+        "tags": [
+          "SkuMapping"
+        ],
+        "summary": "Gets the specified ids.",
+		"operationId": "ApiV1SkuMappingOrderitemsGet",
+        "parameters": [
+          {
+            "name": "ids",
+            "in": "query",
+            "description": "The ids.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "The ids.",
+              "nullable": true
+            }
+          },
+          {
+            "name": "localeId",
+            "in": "query",
+            "description": "Locale Id is defaulted to 1 which is US English. For canada french, it's 2",
+            "schema": {
+              "type": "integer",
+              "description": "Locale Id is defaulted to 1 which is US English. For canada french, it's 2",
+              "format": "int32",
+              "default": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/OrderItem"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/OrderItem"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/OrderItem"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Server Error"
+          }
+        }
+      }
+    },
+    "/api/v1/SkuMapping/{id}/orderitem": {
+      "get": {
+        "tags": [
+          "SkuMapping"
+        ],
+        "summary": "Gets the specified identifier.",
+		"operationId": "ApiV1SkuMappingByIdOrderitemGet",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The identifier.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "The identifier.",
+              "nullable": true
+            }
+          },
+          {
+            "name": "localeId",
+            "in": "query",
+            "description": "Locale Id is defaulted to 1 which is US English. For canada french, it's 2",
+            "schema": {
+              "type": "integer",
+              "description": "Locale Id is defaulted to 1 which is US English. For canada french, it's 2",
+              "format": "int32",
+              "default": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderItem"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderItem"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderItem"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server Error"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "OrderItem": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "sid": {
+            "type": "string",
+            "nullable": true
+          },
+          "quantity": {
+            "type": "number",
+            "format": "float"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "categoryId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "instruction": {
+            "type": "string",
+            "nullable": true
+          },
+          "targetBox": {
+            "type": "string",
+            "nullable": true
+          },
+          "ChildItems": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderItem"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  }
+}
